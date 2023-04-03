@@ -46,7 +46,7 @@ public class FileUpload {
     private static void addImageData(PrintWriter body, OutputStream directOutput, byte[] byteStream,
                                           final String boundary) throws IOException {
         body.append(boundary).append(CRLF);
-        body.append("Content-Disposition: form-data; inline; filename=\"image_1.jpg\"").append(CRLF);
+        body.append("Content-Disposition: form-data; inline; filename=\"apimkov.jpg\"").append(CRLF);
         body.append("Content-Type: image/jpeg").append(CRLF);
         body.append(CRLF);
         body.flush();
