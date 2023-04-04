@@ -1,81 +1,78 @@
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.Charset;
+import java.util.Base64;
 
 public class FileUpload {
 
     private static final String CRLF = "\r\n";
     private static final String CHARSET = "UTF-8";
-    private static final Integer MAX_SIZE = 1000000;
     private static final String BOUNDARY = "===apimkov===";
     private static final String HOST = "194.99.21.219";
-    // private static final String HOST = "127.0.0.1";
+    //private static final String HOST = "127.0.0.1";
     private static final String HOST_FILE = " /upload.php ";
 
-    public void httpUpload(byte[] byteStream) throws IOException {
-        Socket socketClient;
+    public void httpUpload(byte[] byteImageStream) throws IOException {
         Charset UTF8Charset = Charset.forName("UTF8");
+
+        String strBodyData = getBodyData(BOUNDARY);
+        int lenImage = strBodyData.getBytes(UTF8Charset).length;
+        String strCloseDelimeter = getCloseDelimiter(BOUNDARY);
+        int lenDelimeter = strCloseDelimeter.getBytes(UTF8Charset).length;
+        int lenContent = lenImage + byteImageStream.length + lenDelimeter;
+        //System.out.println(lenContent);
+        String strHeader = getHeader(BOUNDARY, lenContent);
+        //String strByte = Base64.getEncoder().encodeToString(byteStream);
+
+        Socket socketClient;
         socketClient = new Socket(HOST,80);
-       // socketClient = new Socket(HOST,8080);//"127.0.0.1"
+        //socketClient = new Socket(HOST, 8080);//"127.0.0.1"
         OutputStream directOutput = socketClient.getOutputStream();
-        PrintWriter body = new PrintWriter(new OutputStreamWriter(directOutput, CHARSET), true);
+        PrintWriter body = new PrintWriter(new OutputStreamWriter(directOutput, CHARSET), false);
 
-        String strImageData = addImageData(body, directOutput, byteStream, BOUNDARY);
-        int lenImage = strImageData.getBytes(UTF8Charset).length;
-        String strDelimeter = addCloseDelimiter(body,BOUNDARY);
-        int lenDelimeter = strDelimeter.getBytes(UTF8Charset).length;
-        int lenContent = lenImage+byteStream.length+lenDelimeter;
-
-        if (lenContent<= MAX_SIZE) {
-            //client send
-            body.append(CRLF);
-            body.flush();
-            addHeader(body, BOUNDARY, lenContent);
-            body.append(strImageData);
-            body.flush();
-            //body.append("BODY");
-            //body.flush();
-            directOutput.write(byteStream);
-            directOutput.flush();
-            body.append(strDelimeter);
-            body.flush();
-        }
+        body.append(strHeader);
+        body.flush();
+        directOutput.write(strBodyData.getBytes(UTF8Charset));
+        directOutput.write(byteImageStream);
+        directOutput.write(strCloseDelimeter.getBytes(UTF8Charset));
+        directOutput.flush();
 
         //server response
         InputStreamReader in = new InputStreamReader(socketClient.getInputStream());
         BufferedReader bf = new BufferedReader(in);
-        String serverResponse = null;
+        String serverResponse = "";
         while ((serverResponse = bf.readLine()) != null)
             System.out.println("server: " + serverResponse);
 
         socketClient.close();
     }
 
-    private static void addHeader(PrintWriter body, final String boundary, int lenContent) {
-        body.append("POST"+HOST_FILE+"HTTP/1.1");
-        body.append(CRLF).append("Host: "+HOST).append(CRLF);
-        body.append("Cache-Control: no-cache").append(CRLF);
-        body.append("Content-Length: "+lenContent+"").append(CRLF);
-        body.append("Content-Type: "+"multipart/form-data; boundary="+boundary+"").append(CRLF);
-        body.append(CRLF);
-        body.flush();
+    private String getHeader(String boundary, int lenBody) {
+        StringBuilder headBuilder = new StringBuilder();
+        headBuilder.append(CRLF);
+        headBuilder.append("POST" + HOST_FILE + "HTTP/1.1");
+        headBuilder.append(CRLF).append("Host: " + HOST).append(CRLF);
+        headBuilder.append("Cache-Control: no-cache").append(CRLF);
+        headBuilder.append("Content-Length: "+lenBody+"").append(CRLF);
+        headBuilder.append("Content-Type: "+"multipart/form-data; boundary="+boundary+"").append(CRLF);
+        headBuilder.append(CRLF);
+        return headBuilder.toString();
     }
 
 
-    private String addImageData(PrintWriter body, OutputStream directOutput, byte[] byteStream, final String boundary) {
+    private String getBodyData(final String boundary) {
         StringBuilder bodyBuilder = new StringBuilder();
         bodyBuilder.append(boundary).append(CRLF);
-        bodyBuilder.append("Content-Disposition: form-data; inline; filename=\"apimkov.jpg\"").append(CRLF);
+        bodyBuilder.append("Content-Disposition: form-data; name=\"file\"; filename=\"apimkov.jpg\"").append(CRLF);
         bodyBuilder.append("Content-Type: image/jpeg").append(CRLF);
         bodyBuilder.append(CRLF);
         return bodyBuilder.toString();
-
     }
 
-    private String addCloseDelimiter(PrintWriter body, final String boundary) {
-        StringBuilder bodyBuilder = new StringBuilder();
-        bodyBuilder.append(CRLF).append(boundary).append("--").append(CRLF);
-        return bodyBuilder.toString();
+    private String getCloseDelimiter(final String boundary) {
+        StringBuilder delimBuilder = new StringBuilder();
+        delimBuilder.append(CRLF).append(boundary).append("--").append(CRLF);
+        return delimBuilder.toString();
     }
 
 }
