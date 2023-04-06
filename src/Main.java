@@ -23,8 +23,6 @@ public class Main {
         finally {
             fileInputStream.close();
         }
-
-
     }
     }
 
