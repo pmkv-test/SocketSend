@@ -1,7 +1,6 @@
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.Charset;
-import java.util.Base64;
 
 public class FileUpload {
 
@@ -13,31 +12,20 @@ public class FileUpload {
     private static final String HOST_FILE = " /upload.php ";
 
     public void httpUpload(byte[] byteImageStream) throws IOException {
-        Charset UTF8Charset = Charset.forName("UTF8");
-        String strBodyData = getBodyData(BOUNDARY, byteImageStream, UTF8Charset);
+        Charset UTF8Charset = Charset.forName(CHARSET);
+        String strBodyData = getBodyData(BOUNDARY, byteImageStream);
         int lenBody = strBodyData.getBytes(UTF8Charset).length;
         String strCloseDelimeter = getCloseDelimiter(BOUNDARY);
         int lenDelimeter = strCloseDelimeter.getBytes(UTF8Charset).length;
         int lenContent = lenBody + lenDelimeter;
         String strHeader = getHeader(BOUNDARY, lenContent);
 
-//        DataOutputStream out= new DataOutputStream(new FileOutputStream("C:\\Photo\\saved.txt"));
-//        out.writeBytes(strHeader);
-//        out.writeBytes(strBodyData);
-//        out.writeBytes(strCloseDelimeter);
-//        out.close();
-
         Socket socketClient;
         socketClient = new Socket(HOST,80);
         //socketClient = new Socket(HOST, 8080);//"127.0.0.1"
         OutputStream directOutput = socketClient.getOutputStream();
-        //PrintWriter body = new PrintWriter(new OutputStreamWriter(directOutput, CHARSET), false);
-        //body.append(strHeader);
-        //body.flush();
-        directOutput.write(strHeader.getBytes(UTF8Charset));
-        directOutput.flush();
-        directOutput.write(strBodyData.getBytes(UTF8Charset));
-        directOutput.write(strCloseDelimeter.getBytes(UTF8Charset));
+        //client send
+        directOutput.write((strHeader + strBodyData + strCloseDelimeter).getBytes(UTF8Charset));
         directOutput.flush();
 
         //server response
@@ -63,13 +51,12 @@ public class FileUpload {
     }
 
 
-    private String getBodyData(String boundary, byte[] byteImageStream, Charset UTF8Charset) {
+    private String getBodyData(String boundary, byte[] byteImageStream) {
         StringBuilder bodyBuilder = new StringBuilder();
-        bodyBuilder.append(boundary).append(CRLF);
+        bodyBuilder.append("--").append(boundary).append(CRLF);
         bodyBuilder.append("Content-Disposition: form-data; name=\"file\"; filename=\"apimkov.jpeg\"").append(CRLF);
         bodyBuilder.append("Content-Type: image/jpeg").append(CRLF);
         bodyBuilder.append(CRLF);
-        //bodyBuilder.append("BODY_TEST");
         bodyBuilder.append(new String(byteImageStream));
         return bodyBuilder.toString();
     }
@@ -77,7 +64,7 @@ public class FileUpload {
     private String getCloseDelimiter(String boundary) {
         StringBuilder delimBuilder = new StringBuilder();
         delimBuilder.append(CRLF);
-        delimBuilder.append(boundary).append("--");
+        delimBuilder.append("--").append(boundary).append("--");
         delimBuilder.append(CRLF);
         return delimBuilder.toString();
     }

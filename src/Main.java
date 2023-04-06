@@ -1,5 +1,3 @@
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 
 public class Main {
@@ -7,8 +5,6 @@ public class Main {
     private static final Integer MAX_SIZE = 1000000;
 
     public static void main(String[] args) throws IOException {
-
-        //byte[] bytes = Files.readAllBytes(Paths.get(IMAGE_PATH));
         FileInputStream fileInputStream = null;
         try {
             File file = new File(IMAGE_PATH);
