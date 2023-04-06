@@ -7,7 +7,7 @@ public class FileUpload {
     private static final String CHARSET = "UTF-8";
     private static final String BOUNDARY = "===apimkov===";
     private static final String HOST = "194.99.21.219";
-   //private static final String HOST = "127.0.0.1";
+    //private static final String HOST = "127.0.0.1";
     private static final String HOST_FILE = " /upload.php ";
 
     public void httpUpload(byte[] byteImageStream) throws IOException {
@@ -20,7 +20,7 @@ public class FileUpload {
         String strHeader = getHeader(BOUNDARY, lenContent);
 
         Socket socketClient;
-        socketClient = new Socket(HOST,80);
+        socketClient = new Socket(HOST, 80);
         //socketClient = new Socket(HOST, 8080);//"127.0.0.1"
         OutputStream directOutput = socketClient.getOutputStream();
         //client send
@@ -43,8 +43,8 @@ public class FileUpload {
         headBuilder.append("POST" + HOST_FILE + "HTTP/1.1").append(CRLF);
         headBuilder.append("Host: " + HOST).append(CRLF);
         headBuilder.append("Cache-Control: no-cache").append(CRLF);
-        headBuilder.append("Content-Length: "+lenBody+"").append(CRLF);
-        headBuilder.append("Content-Type: "+"multipart/form-data; boundary="+boundary+"").append(CRLF);
+        headBuilder.append("Content-Length: " + lenBody + "").append(CRLF);
+        headBuilder.append("Content-Type: " + "multipart/form-data; boundary=" + boundary + "").append(CRLF);
         headBuilder.append(CRLF);
         return headBuilder.toString();
     }
