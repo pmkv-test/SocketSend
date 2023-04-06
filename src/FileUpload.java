@@ -3,7 +3,6 @@ import java.net.Socket;
 import java.nio.charset.Charset;
 
 public class FileUpload {
-
     private static final String CRLF = "\r\n";
     private static final String CHARSET = "UTF-8";
     private static final String BOUNDARY = "===apimkov===";
